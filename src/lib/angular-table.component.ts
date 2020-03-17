@@ -14,6 +14,7 @@ export class AngularTableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    
   }
 
 }
