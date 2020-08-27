@@ -1,0 +1,561 @@
+<div class="row mb-10" style="margin-bottom: 10px" *ngIf="config.checkboxOption">
+    <div class="col-md-12">
+        <div class="btn-group" role="group" aria-label="First group">
+            <ng-container *ngFor="let btn of config.checkboxOption.buttonOption">
+                <button type="button" class="btn" [ngClass]="btn.btnClass"
+                    (click)="checkboxActionTrigger(btn.dataEmit)"><i [ngClass]="btn.icon"></i> {{btn.label}}</button>
+            </ng-container>
+        </div>
+    </div>
+</div>
+
+<div [ngClass]="{'card': config.advanceOption.showPagination}">
+    <div [ngClass]="{'scrollable' : config.advanceOption.showHorizontalScroll}" class="kt-portlet m-0">
+        <div class="kt-portlet__body p-0">
+            <table class="table table-bordered" *ngIf="(!loading || config.dataSource) else Loading">
+                <thead>
+                    <tr>
+                        <td class="align-middle"
+                            [attr.rowspan]="((config.advanceOption.showExpandable && config.advanceOption.showFilterColumn) || config.advanceOption.showFilterColumn)?2:1">
+                            No.
+                        </td>
+                        <ng-container *ngIf="config.checkboxOption">
+                            <td class="align-middle"
+                                [attr.rowspan]="((config.advanceOption.showExpandable && config.advanceOption.showFilterColumn) || config.advanceOption.showFilterColumn)?2:1">
+                                <label class="kt-checkbox kt-checkbox--bold kt-checkbox--brand">
+                                    <input type="checkbox" [(ngModel)]="checkboxAll" name="checkboxall"
+                                        (change)="checkboxAllTriggered()">
+                                    <span></span>
+                                </label>
+                            </td>
+                        </ng-container>
+                        <td *ngIf="config.advanceOption.showExpandable">&nbsp;</td>
+                        <td *ngIf="config.advanceOption.showActionColumn" class="text-center"><i
+                                class="flaticon-more-1"></i>
+                        </td>
+                        <td *ngFor="let col of config.displayedColumns" [style.white-space]="'nowrap'"
+                            [style.min-width.px]="100">
+                            {{parseColumnOption(config.columnOption,'column',col,'label')}}</td>
+                    </tr>
+                    <tr
+                        *ngIf="config.advanceOption.showExpandable || config.advanceOption.showFilterColumn">
+                        <td
+                            *ngIf="config.advanceOption.showExpandable && config.advanceOption.showFilterColumn">
+                            &nbsp;</td>
+                        <td
+                            *ngIf="config.advanceOption.showActionColumn && config.advanceOption.showFilterColumn">
+                            <div class="btn-group" role="group" aria-label="First group">
+                                <button (click)="submitFilter()" type="button"
+                                    class="btn btn-outline-primary btn-sm btn-icon"><fa-icon [icon]="faFilter"></fa-icon></button>
+                                <button (click)="resetFilter()" type="button"
+                                    class="btn btn-outline-warning btn-sm btn-icon"><fa-icon [icon]="faSync"></fa-icon></button>
+                            </div>
+                        </td>
+                        <ng-container *ngIf="config.advanceOption.showFilterColumn">
+                            <td *ngFor="let col of config.displayedColumns">
+                                <ng-container
+                                    *ngIf="parseColumnOption(config.columnOption,'column',col,'showFilter')">
+                                    <ng-container
+                                        [ngSwitch]="parseColumnOption(config.columnOption,'column',col,'inputType')">
+                                        <ng-container *ngSwitchCase="'text'">
+                                            <input type="text" [(ngModel)]="config.filter[col]"
+                                                class="form-control" (keyup.enter)="submitFilter()">
+                                        </ng-container>
+                                        <ng-container *ngSwitchCase="'select'">
+                                            <select [(ngModel)]="config.filter[col]" class="form-control"
+                                                (change)="submitFilter()">
+                                                <option [value]="''"></option>
+                                                <ng-container
+                                                    *ngFor="let item of parseColumnOption(config.columnOption,'column',col,'listOption')">
+                                                    <option [value]="item.key">{{item.val}}</option>
+                                                </ng-container>
+                                            </select>
+                                        </ng-container>
+                                        <ng-container *ngSwitchCase="'number'">
+                                            <input type="number" [(ngModel)]="config.filter[col]"
+                                                class="form-control" (keyup.enter)="submitFilter()">
+                                        </ng-container>
+                                        <ng-container *ngSwitchCase="'period'">
+                                            <input type="month" [(ngModel)]="config.filter[col]"
+                                                class="form-control" (keyup.enter)="submitFilter()"
+                                                (change)="submitFilter()">
+                                        </ng-container>
+                                        <ng-container *ngSwitchDefault>
+                                            <input type="text" [(ngModel)]="config.filter[col]"
+                                                class="form-control" (keyup.enter)="submitFilter()">
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let row of config.dataSource; let i = index;">
+                        <tr>
+                            <td>{{(config.paginateOption.pageNumber-1)*config.paginateOption.pageSize+(i+1)}}
+                            </td>
+                            <ng-container *ngIf="config.checkboxOption">
+                                <td>
+                                    <label class="kt-checkbox kt-checkbox--bold kt-checkbox--brand">
+                                        <input type="checkbox"
+                                            [(ngModel)]="config.checkboxOption.itemCheckbox[i]['isSelected']"
+                                            name="item_checkbox">
+                                        <span></span>
+                                    </label>
+                                </td>
+                            </ng-container>
+                            <td *ngIf="config.advanceOption.showExpandable" class="align-middle">
+                                <button (click)="expandToogle(row[config.primaryKey])" type="button"
+                                    class="btn btn-outline-dark btn-icon btn-sm">
+                                    <!-- <i
+                                        [ngClass]="{'flaticon2-next': (!expandedElement || row[config.primaryKey] != currentRow), 'flaticon2-down': (expandedElement && row[config.primaryKey] == currentRow)}"></i> -->
+                                        <fa-icon [icon]="(expandedElement && row[config.primaryKey] == currentRow) ? faDown : faRight"></fa-icon>
+                                    </button>
+                            </td>
+                            <td *ngIf="config.advanceOption.showActionColumn">
+                                <ng-container
+                                    *ngIf="!config.advanceOption.isEditableTable || config.advanceOption.showDropzone === true">
+                                    <div ngbDropdown placement="right-top" class="d-inline-block mr-3">
+                                        <button class="btn btn-sm btn-outline-primary btn-icon" id="dropdownBasic1"
+                                            ngbDropdownToggle>
+                                            <fa-icon [icon]="faEdit"></fa-icon>
+                                        </button>
+                                        <div ngbDropdownMenu aria-labelledby="dropdownBasic1"
+                                            class="dropdown-menu-right">
+                                            <ng-container *ngFor="let btn of config.buttonOption"
+                                                [ngSwitch]="btn.type">
+
+
+                                                <ng-container
+                                                    *ngIf="btn.visible == undefined || (btn.visible && btn.visible(row)) ">
+                                                    <ng-container *ngSwitchCase="'route'">
+                                                        <ng-template
+                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                            <button ngbDropdownItem
+                                                                [routerLink]="buildRoute(row, btn.route, btn.routeParam)"
+                                                                [queryParams]="extractParam(row, (btn.queryParam)?btn.queryParam:{})"
+                                                                [hidden]="btn.hideButton">
+                                                                <span class="mr-3"><i class="{{btn.icon}}"></i></span>
+                                                                <span>{{btn.label}}</span>
+                                                            </button>
+                                                        </ng-template>
+                                                    </ng-container>
+                                                    <ng-container *ngSwitchCase="'modal'">
+                                                        <ng-template
+                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                            <button ngbDropdownItem
+                                                                (click)="openModal(extractParam(row, btn.param),btn.componentModal)"
+                                                                [hidden]="btn.hideButton">
+                                                                <span class="mr-3"><i class="{{btn.icon}}"></i></span>
+                                                                <span>{{btn.label}}</span>
+                                                            </button>
+                                                        </ng-template>
+                                                    </ng-container>
+                                                    <ng-container *ngSwitchCase="'self'">
+                                                        <ng-template
+                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                            <button ngbDropdownItem
+                                                                (click)="sendParam(extractParam(row, btn.param), btn.action)"
+                                                                [hidden]="btn.hideButton">
+                                                                <span class="mr-3"><i class="{{btn.icon}}"></i></span>
+                                                                <span>{{btn.label}}</span>
+                                                            </button>
+                                                        </ng-template>
+                                                    </ng-container>
+                                                    <ng-container *ngSwitchCase="'callback'">
+                                                        <ng-template
+                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                            <button ngbDropdownItem (click)="btn.callback(row)"
+                                                                [hidden]="btn.hideButton">
+                                                                <span class="mr-3"><i class="{{btn.icon}}"></i></span>
+                                                                <span>{{btn.label}}</span>
+                                                            </button>
+                                                        </ng-template>
+                                                    </ng-container>
+                                                    <ng-container *ngSwitchCase="'separator'">
+                                                        <hr />
+                                                    </ng-container>
+                                                    <button *ngSwitchDefault ngbDropdownItem
+                                                        [routerLink]="buildRoute(row, btn.route, btn.routeParam)"
+                                                        [queryParams]="extractParam(row, (btn.queryParam)?btn.queryParam:{})"><i
+                                                            class="{{btn.icon}}"></i>
+                                                        {{btn.label}}</button>
+
+                                                </ng-container>
+
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="config.advanceOption.isEditableTable">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <ng-container
+                                            *ngIf="config.advanceOption.showDeleteButton !== false">
+                                            <button (click)="delete(row)" type="button"
+                                                class="btn btn-danger btn-sm btn-icon">
+                                                <i class="fa fa-trash fa-sm"></i>
+                                            </button>
+                                        </ng-container>
+                                        <ng-container *ngIf="config.advanceOption.showEditButton !== false">
+                                            <button (click)="save()" type="button"
+                                                class="btn btn-primary btn-sm btn-icon"
+                                                *ngIf="onEdit && row[config.primaryKey] == currentRow">
+                                                <i class="fa fa-save fa-sm"></i>
+                                            </button>
+                                            <!-- button edit kalo ada parameter showEditButton -->
+                                            <ng-container *ngIf="config.showEditButton else editBiasa">
+                                                <button (click)="edit(row)" type="button"
+                                                    class="btn btn-success btn-sm btn-icon"
+                                                    *ngIf="(!onEdit || row[config.primaryKey] != currentRow)"
+                                                    [hidden]="!config.showEditButton[i]">
+                                                    <i class="fa fa-edit fa-sm"></i>
+                                                </button>
+                                            </ng-container>
+                                            <!-- button edit kalo tidak ada parameter showEditButton -->
+                                            <ng-template #editBiasa>
+                                                <button (click)="edit(row)" type="button"
+                                                    class="btn btn-success btn-sm btn-icon"
+                                                    *ngIf="(!onEdit || row[config.primaryKey] != currentRow)">
+                                                    <i class="fa fa-edit fa-sm"></i>
+                                                </button>
+                                            </ng-template>
+                                            <button (click)="cancelEdit()" type="button"
+                                                class="btn btn-warning btn-sm btn-icon"
+                                                *ngIf="onEdit && row[config.primaryKey] == currentRow">
+                                                <i class="fa fa-close fa-sm"></i>
+                                            </button>
+                                        </ng-container>
+                                    </div>
+                                </ng-container>
+                            </td>
+                            <td *ngFor="let col of config.displayedColumns" [style.white-space]="'nowrap'"
+                                [style.text-align]="parseColumnOption(config.columnOption,'column',col,'align') || 'left'">
+                                <ng-container [ngSwitch]="true">
+                                    <ng-container
+                                        *ngSwitchCase="parseColumnOption(config.columnOption,'column',col,'contentType') && parseColumnOption(config.columnOption,'column',col,'contentType') == 'profile'">
+                                        <span style="width: 200px;">
+                                            <div class="kt-user-card-v2">
+                                                <div class="kt-user-card-v2__pic">
+                                                    <img *ngIf="row['profile'].includes('s3.ptnw.net/uploads') else imgDefaultProfile;"
+                                                        [src]="row['profile']" alt="image"
+                                                        class="rounded rounded-circle">
+                                                    <ng-template #imgDefaultProfile>
+                                                        <img src="/assets/media/users/default.jpg" alt="image"
+                                                            class="rounded rounded-circle">
+                                                    </ng-template>
+                                                </div>
+                                                <div *ngIf="row['nama'] && row['username']"
+                                                    class="kt-user-card-v2__details">
+                                                    <span class="kt-user-card-v2__name">{{row['nama']}}</span>
+                                                    <span class="kt-user-card-v2__desc">{{row['username']}}</span>
+                                                </div>
+                                            </div>
+                                        </span>
+                                    </ng-container>
+                                    <ng-container
+                                        *ngSwitchCase="parseColumnOption(config.columnOption,'column',col,'contentType') && parseColumnOption(config.columnOption,'column',col,'contentType') == 'imgPath'">
+                                        <a href="{{row[col]}}" target="_blank">
+                                            <img [src]="row[col]" alt="image" style="width: 50px;"
+                                                onerror="src='/assets/media/users/default.jpg'">
+                                        </a>
+                                    </ng-container>
+                                    <ng-container *ngSwitchDefault>
+                                        <ng-container
+                                            *ngIf="(!onEdit || row[config.primaryKey] != currentRow)">
+                                            <ng-container
+                                                *ngIf="!parseColumnOption(config.columnOption,'column',col,'setDownloadButton')">
+                                                <ng-container
+                                                    *ngIf="parseColumnOption(config.columnOption,'column',col,'labelValue');let labelValue;else defaultValue">
+                                                    {{labelValue[row[col]]}}
+                                                </ng-container>
+                                                <ng-template #defaultValue>
+                                                    <span
+                                                        [style.float]="(parseColumnOption(config.columnOption,'column',col,'setPipe') == 'currency' || parseColumnOption(config.columnOption,'column',col,'setPipe') == 'number')? 'right' : 'left'">
+                                                        {{row[col] === null ? 'not set' : row[col] | formatValue: parseColumnOption(config.columnOption,'column',col,'setPipe')}}
+                                                    </span>
+                                                </ng-template>
+                                            </ng-container>
+                                            <ng-container
+                                                *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton')">
+                                                <ng-container *ngIf="row[col] != null">
+                                                    <ng-container
+                                                        *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'direct'">
+                                                        <a class="btn btn-sm btn-primary mr-2"
+                                                            href="{{api_version_url+'/'+row[col]}}" download><i
+                                                                class="fa fa-download"></i>VIEW
+                                                            /
+                                                            DOWNLOAD</a>
+                                                    </ng-container>
+                                                    <ng-container
+                                                        *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'tableBackblaze'">
+                                                        <a class="btn btn-sm btn-primary mr-2"
+                                                            href="{{api_url + '/site/download/'+row[col]}}"
+                                                            [target]="'_blank'"><i class="fa fa-download"></i>VIEW /
+                                                            DOWNLOAD</a>
+                                                    </ng-container>
+                                                    <ng-container
+                                                        *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'tableWasabi'">
+                                                        <a class="btn btn-sm btn-primary mr-2"
+                                                            href="{{api_url + '/site/download-from-wasabi/'+row[col]}}"
+                                                            [target]="'_blank'"><i class="fa fa-download"></i>VIEW /
+                                                            DOWNLOAD</a>
+                                                    </ng-container>
+                                                </ng-container>
+                                                <ng-container *ngIf="row[col] == null">
+                                                    -
+                                                </ng-container>
+                                            </ng-container>
+                                        </ng-container>
+                                        <ng-container
+                                            *ngIf="(onEdit && row[config.primaryKey] == currentRow)">
+                                            <ng-container
+                                                [ngSwitch]="parseColumnOption(config.columnOption,'column',col,'inputType')">
+                                                <ng-container *ngSwitchCase="'date'">
+                                                    <input class="form-control" [placeholder]="'yyyy-mm-dd'" name="col"
+                                                        [(ngModel)]="currentEdit[col]" ngbDatepicker #d="ngbDatepicker"
+                                                        required readOnly (click)="d.toggle()">
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'text'">
+                                                    <input type="text" [name]="col" [(ngModel)]="currentEdit[col]"
+                                                        class="form-control"
+                                                        [disabled]="!parseColumnOption(config.columnOption,'column',col,'editable')">
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'typehead'">
+                                                    <span>Under construction</span>
+                                                    <!-- <app-dynamic-select [id]="'dynamicSelect'+col"
+                                                        [dataOptions]="parseColumnOption(config.columnOption,'column',col,'listOption')"
+                                                        [dataOptions]="parseColumnOption(config.columnOption,'column',col,'listOption')"
+                                                        (selected)="getSelectedTypehead($event, col)">
+                                                    </app-dynamic-select> -->
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'select'">
+                                                    <select [name]="col" [(ngModel)]="currentEdit[col]"
+                                                        class="form-control"
+                                                        (change)="getSelectedSelect($event.target.value, col)">
+                                                        <ng-container
+                                                            *ngFor="let item of parseColumnOption(config.columnOption,'column',col,'listOption')">
+                                                            <option [value]="item.key">{{item.val}}</option>
+                                                        </ng-container>
+                                                    </select>
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'number'">
+                                                    <input type="number" [name]="col" [(ngModel)]="currentEdit[col]"
+                                                        class="form-control"
+                                                        [disabled]="!parseColumnOption(config.columnOption,'column',col,'editable')">
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'file'">
+                                                    <span>Under construction</span>
+                                                    <!-- <app-direct-upload
+                                                        [tableTarget]="parseColumnOption(config.columnOption,'column',col,'tableTarget')?parseColumnOption(config.columnOption,'column',col,'tableTarget'):'tableCommon'"
+                                                        [columnTarget]="col"
+                                                        [prefix]="parseColumnOption(config.columnOption,'column',col,'prefixFileInput')"
+                                                        [acceptFile]="'.pdf, .png, .jpg, .jpeg'"
+                                                        (success)="onSuccess($event,col)"></app-direct-upload> -->
+                                                </ng-container>
+                                                <ng-container *ngSwitchCase="'datetime'">
+                                                    <input type="datetime-local" [name]="col"
+                                                        [(ngModel)]="currentEdit[col]" class="form-control"
+                                                        [disabled]="!parseColumnOption(config.columnOption,'column',col,'editable')">
+                                                </ng-container>
+                                                <ng-container *ngSwitchDefault>
+                                                    <input type="text" [name]="col" [(ngModel)]="currentEdit[col]"
+                                                        class="form-control"
+                                                        [disabled]="!parseColumnOption(config.columnOption,'column',col,'editable')">
+                                                </ng-container>
+                                            </ng-container>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </td>
+                        </tr>
+                        <tr *ngIf="expandedElement && row[config.primaryKey] == currentRow">
+                            <td [attr.colSpan]="config.displayedColumns.length+3">
+                                <div *ngIf="config.expandRowConfig.dataApproval && config.expandRowConfig.typeContent == 'approval'"
+                                    class="row">
+                                    <div class="col-lg-12">
+                                        <div class="card">
+                                            <div class="kt-portlet">
+                                                <div class="kt-portlet__head">
+                                                    <div class="kt-portlet__head-label">
+                                                        <h3 class="kt-portlet__head-title">
+                                                            Step Approval
+                                                        </h3>
+                                                    </div>
+                                                </div>
+                                                <div class="kt-portlet__body">
+                                                    <div class="kt-notes">
+                                                        <div class="kt-notes__items">
+                                                            <ng-container
+                                                                *ngFor="let step of config.expandRowConfig.dataApproval">
+                                                                <div *ngIf="step.pass == 1" class="kt-notes__item">
+                                                                    <div class="kt-notes__media">
+                                                                        <span class="kt-notes__icon">
+                                                                            <i
+                                                                                [ngClass]="step.reject_reason ? 'flaticon-exclamation-1 kt-font-warning' : 'flaticon2-check-mark kt-font-brand'"></i>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="kt-notes__content">
+                                                                        <div class="kt-notes__section">
+                                                                            <div class="kt-notes__info">
+                                                                                <a href="javascript:;"
+                                                                                    class="kt-notes__title">
+                                                                                    {{step.step_description}}
+                                                                                </a>
+                                                                                <span class="kt-notes__desc">
+                                                                                    {{step.approval_date}}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <span class="kt-notes__body">
+                                                                            <span
+                                                                                class="kt-badge kt-badge--inline kt-badge--success">
+                                                                                by {{step.approval_pic}}
+                                                                            </span><br>
+                                                                            <ng-container *ngIf="step.reject_reason">
+                                                                                Reject Reason : <br>
+                                                                                {{step.reject_reason}}
+                                                                            </ng-container>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div *ngIf="step.pass == 0 || step.pass == null"
+                                                                    class="kt-notes__item">
+                                                                    <div class="kt-notes__media">
+                                                                        <span class="kt-notes__icon">
+                                                                            <i *ngIf="step.step_description === 'Reject'"
+                                                                                class="flaticon2-cross kt-font-danger"></i>
+                                                                            <i *ngIf="step.step_description === 'Finish'"
+                                                                                class="flaticon2-check-mark kt-font-brand"></i>
+                                                                            <i *ngIf="step.step_description !== 'Reject' && step.step_description !== 'Finish'"
+                                                                                class="flaticon2-hourglass-1 kt-font-danger"></i>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div *ngIf="step.step_description !== 'Reject' && step.step_description !== 'Finish'"
+                                                                        class="kt-notes__content">
+                                                                        <div class="kt-notes__section">
+                                                                            <div class="kt-notes__info">
+                                                                                <a href="javascript:;"
+                                                                                    class="kt-notes__title">
+                                                                                    {{step.step_description}}
+                                                                                </a>
+                                                                                <span class="kt-notes__desc">
+                                                                                    not yet
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <span class="kt-notes__body">
+                                                                            <span
+                                                                                class="kt-badge kt-badge--danger kt-badge--inline">by
+                                                                                {{step.approval_pic}}</span>
+                                                                        </span>
+                                                                    </div>
+                                                                    <div *ngIf="step.step_description === 'Finish'"
+                                                                        class="kt-notes__content">
+                                                                        <div class="kt-notes__section">
+                                                                            <div class="kt-notes__info">
+                                                                                <a href="javascript:;"
+                                                                                    class="kt-notes__title">
+                                                                                    Finished
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div *ngIf="step.step_description === 'Reject'"
+                                                                        class="kt-notes__content">
+                                                                        <div class="kt-notes__section">
+                                                                            <div class="kt-notes__info">
+                                                                                <a href="javascript:;"
+                                                                                    class="kt-notes__title">
+                                                                                    Rejected
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </ng-container>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="config.expandRowConfig.dataTable && config.expandRowConfig.typeContent == 'table'"
+                                    class="row">
+                                    <div class="col-lg-12">
+                                        <table class="table">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <ng-container
+                                                        *ngFor="let column of config.expandRowConfig.dataTable.column;">
+                                                        <th>{{config.expandRowConfig.dataTable.label[column]}}
+                                                        </th>
+                                                    </ng-container>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <ng-container
+                                                    *ngFor="let row of config.expandRowConfig.dataTable.row; let i = index;">
+                                                    <tr>
+                                                        <th scope="row">{{i+1}}</th>
+                                                        <ng-container
+                                                            *ngFor="let column of config.expandRowConfig.dataTable.column;">
+                                                            <td>{{row[column]}}</td>
+                                                        </ng-container>
+                                                    </tr>
+                                                </ng-container>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+        <!--begin: Pagination-->
+        <div class="kt-portlet__foot"
+            *ngIf="config.advanceOption.showPagination && config.dataSource.length > 0">
+            <div class="kt-pagination kt-pagination--brand">
+                <ul class="kt-pagination__links">
+                    <ngb-pagination [collectionSize]="config.paginateOption.total"
+                        [(page)]="config.paginateOption.pageNumber"
+                        [pageSize]="config.paginateOption.pageSize" [maxSize]="5" [rotate]="true"
+                        [ellipses]="false" [boundaryLinks]="true" (pageChange)="changePage($event, false)">
+                    </ngb-pagination>
+                    <span class="pagination__desc">
+                        Page {{config.paginateOption.pageNumber}} of
+                        {{config.paginateOption.getTotalPage()}}
+                    </span>
+                </ul>
+                <div class="kt-pagination__toolbar">
+                    <select [(ngModel)]="currentPageSize" (change)="changePageSize()" class="form-control kt-font-brand"
+                        style="width: 70px">
+                        <option *ngFor="let number of config.pageSizeOption" [value]="number">{{number}}
+                        </option>
+                    </select>
+                    <span class="pagination__desc">
+                        Displaying
+                        {{(config.dataSource.length < config.paginateOption.pageSize) ? config.dataSource.length : config.paginateOption.pageSize}}
+                        of {{config.paginateOption.total}} records
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!--end: Pagination-->
+    </div>
+    <div class="kt-portlet" *ngIf="(config.dataSource.length === 0) && !loading">
+        <div class="kt-portlet__body">
+            <p>No data record</p>
+        </div>
+    </div>
+</div>
+
+<ng-template #Loading>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+        <img src="/assets/media/loader/timeline.svg">
+    </div>
+</ng-template>
