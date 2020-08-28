@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormatValuePipe } from './pipes/format-value.pipe';
-import { GlobalService } from './global.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 
@@ -22,7 +21,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     NgbModule,
     FontAwesomeModule
   ],
-  exports: [AngularTableComponent],
-  providers: [GlobalService]
+  exports: [AngularTableComponent]
 })
 export class AngularTableModule { }

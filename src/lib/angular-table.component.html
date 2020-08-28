@@ -17,7 +17,7 @@
                     <tr>
                         <td class="align-middle"
                             [attr.rowspan]="((config.advanceOption.showExpandable && config.advanceOption.showFilterColumn) || config.advanceOption.showFilterColumn)?2:1">
-                            No.
+                            #
                         </td>
                         <ng-container *ngIf="config.checkboxOption">
                             <td class="align-middle"
@@ -37,29 +37,30 @@
                             [style.min-width.px]="100">
                             {{parseColumnOption(config.columnOption,'column',col,'label')}}</td>
                     </tr>
-                    <tr
-                        *ngIf="config.advanceOption.showExpandable || config.advanceOption.showFilterColumn">
-                        <td
-                            *ngIf="config.advanceOption.showExpandable && config.advanceOption.showFilterColumn">
+                    <tr *ngIf="config.advanceOption.showExpandable || config.advanceOption.showFilterColumn">
+                        <td *ngIf="config.advanceOption.showExpandable && config.advanceOption.showFilterColumn">
                             &nbsp;</td>
-                        <td
-                            *ngIf="config.advanceOption.showActionColumn && config.advanceOption.showFilterColumn">
+                        <td *ngIf="config.advanceOption.showActionColumn && config.advanceOption.showFilterColumn"
+                            class="text-center">
                             <div class="btn-group" role="group" aria-label="First group">
                                 <button (click)="submitFilter()" type="button"
-                                    class="btn btn-outline-primary btn-sm btn-icon"><fa-icon [icon]="faFilter"></fa-icon></button>
+                                    class="btn btn-outline-primary btn-sm btn-icon">
+                                    <fa-icon [icon]="faFilter"></fa-icon>
+                                </button>
                                 <button (click)="resetFilter()" type="button"
-                                    class="btn btn-outline-warning btn-sm btn-icon"><fa-icon [icon]="faSync"></fa-icon></button>
+                                    class="btn btn-outline-warning btn-sm btn-icon">
+                                    <fa-icon [icon]="faSync"></fa-icon>
+                                </button>
                             </div>
                         </td>
                         <ng-container *ngIf="config.advanceOption.showFilterColumn">
                             <td *ngFor="let col of config.displayedColumns">
-                                <ng-container
-                                    *ngIf="parseColumnOption(config.columnOption,'column',col,'showFilter')">
+                                <ng-container *ngIf="parseColumnOption(config.columnOption,'column',col,'showFilter')">
                                     <ng-container
                                         [ngSwitch]="parseColumnOption(config.columnOption,'column',col,'inputType')">
                                         <ng-container *ngSwitchCase="'text'">
-                                            <input type="text" [(ngModel)]="config.filter[col]"
-                                                class="form-control" (keyup.enter)="submitFilter()">
+                                            <input type="text" [(ngModel)]="config.filter[col]" class="form-control"
+                                                (keyup.enter)="submitFilter()">
                                         </ng-container>
                                         <ng-container *ngSwitchCase="'select'">
                                             <select [(ngModel)]="config.filter[col]" class="form-control"
@@ -72,17 +73,16 @@
                                             </select>
                                         </ng-container>
                                         <ng-container *ngSwitchCase="'number'">
-                                            <input type="number" [(ngModel)]="config.filter[col]"
-                                                class="form-control" (keyup.enter)="submitFilter()">
+                                            <input type="number" [(ngModel)]="config.filter[col]" class="form-control"
+                                                (keyup.enter)="submitFilter()">
                                         </ng-container>
                                         <ng-container *ngSwitchCase="'period'">
-                                            <input type="month" [(ngModel)]="config.filter[col]"
-                                                class="form-control" (keyup.enter)="submitFilter()"
-                                                (change)="submitFilter()">
+                                            <input type="month" [(ngModel)]="config.filter[col]" class="form-control"
+                                                (keyup.enter)="submitFilter()" (change)="submitFilter()">
                                         </ng-container>
                                         <ng-container *ngSwitchDefault>
-                                            <input type="text" [(ngModel)]="config.filter[col]"
-                                                class="form-control" (keyup.enter)="submitFilter()">
+                                            <input type="text" [(ngModel)]="config.filter[col]" class="form-control"
+                                                (keyup.enter)="submitFilter()">
                                         </ng-container>
                                     </ng-container>
                                 </ng-container>
@@ -110,10 +110,12 @@
                                     class="btn btn-outline-dark btn-icon btn-sm">
                                     <!-- <i
                                         [ngClass]="{'flaticon2-next': (!expandedElement || row[config.primaryKey] != currentRow), 'flaticon2-down': (expandedElement && row[config.primaryKey] == currentRow)}"></i> -->
-                                        <fa-icon [icon]="(expandedElement && row[config.primaryKey] == currentRow) ? faDown : faRight"></fa-icon>
-                                    </button>
+                                    <fa-icon
+                                        [icon]="(expandedElement && row[config.primaryKey] == currentRow) ? faDown : faRight">
+                                    </fa-icon>
+                                </button>
                             </td>
-                            <td *ngIf="config.advanceOption.showActionColumn">
+                            <td *ngIf="config.advanceOption.showActionColumn" class="text-center">
                                 <ng-container
                                     *ngIf="!config.advanceOption.isEditableTable || config.advanceOption.showDropzone === true">
                                     <div ngbDropdown placement="right-top" class="d-inline-block mr-3">
@@ -123,15 +125,13 @@
                                         </button>
                                         <div ngbDropdownMenu aria-labelledby="dropdownBasic1"
                                             class="dropdown-menu-right">
-                                            <ng-container *ngFor="let btn of config.buttonOption"
-                                                [ngSwitch]="btn.type">
+                                            <ng-container *ngFor="let btn of config.buttonOption" [ngSwitch]="btn.type">
 
 
                                                 <ng-container
                                                     *ngIf="btn.visible == undefined || (btn.visible && btn.visible(row)) ">
                                                     <ng-container *ngSwitchCase="'route'">
-                                                        <ng-template
-                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                        <ng-template>
                                                             <button ngbDropdownItem
                                                                 [routerLink]="buildRoute(row, btn.route, btn.routeParam)"
                                                                 [queryParams]="extractParam(row, (btn.queryParam)?btn.queryParam:{})"
@@ -142,8 +142,7 @@
                                                         </ng-template>
                                                     </ng-container>
                                                     <ng-container *ngSwitchCase="'modal'">
-                                                        <ng-template
-                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                        <ng-template>
                                                             <button ngbDropdownItem
                                                                 (click)="openModal(extractParam(row, btn.param),btn.componentModal)"
                                                                 [hidden]="btn.hideButton">
@@ -153,8 +152,7 @@
                                                         </ng-template>
                                                     </ng-container>
                                                     <ng-container *ngSwitchCase="'self'">
-                                                        <ng-template
-                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                        <ng-template>
                                                             <button ngbDropdownItem
                                                                 (click)="sendParam(extractParam(row, btn.param), btn.action)"
                                                                 [hidden]="btn.hideButton">
@@ -164,8 +162,7 @@
                                                         </ng-template>
                                                     </ng-container>
                                                     <ng-container *ngSwitchCase="'callback'">
-                                                        <ng-template
-                                                            [ngxPermissionsOnly]="((btn.permissions)?btn.permissions:['USER'])">
+                                                        <ng-template>
                                                             <button ngbDropdownItem (click)="btn.callback(row)"
                                                                 [hidden]="btn.hideButton">
                                                                 <span class="mr-3"><i class="{{btn.icon}}"></i></span>
@@ -190,8 +187,7 @@
                                 </ng-container>
                                 <ng-container *ngIf="config.advanceOption.isEditableTable">
                                     <div class="btn-group" role="group" aria-label="First group">
-                                        <ng-container
-                                            *ngIf="config.advanceOption.showDeleteButton !== false">
+                                        <ng-container *ngIf="config.advanceOption.showDeleteButton !== false">
                                             <button (click)="delete(row)" type="button"
                                                 class="btn btn-danger btn-sm btn-icon">
                                                 <i class="fa fa-trash fa-sm"></i>
@@ -261,8 +257,7 @@
                                         </a>
                                     </ng-container>
                                     <ng-container *ngSwitchDefault>
-                                        <ng-container
-                                            *ngIf="(!onEdit || row[config.primaryKey] != currentRow)">
+                                        <ng-container *ngIf="(!onEdit || row[config.primaryKey] != currentRow)">
                                             <ng-container
                                                 *ngIf="!parseColumnOption(config.columnOption,'column',col,'setDownloadButton')">
                                                 <ng-container
@@ -281,23 +276,22 @@
                                                 <ng-container *ngIf="row[col] != null">
                                                     <ng-container
                                                         *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'direct'">
-                                                        <a class="btn btn-sm btn-primary mr-2"
-                                                            href="{{api_version_url+'/'+row[col]}}" download><i
-                                                                class="fa fa-download"></i>VIEW
+                                                        <a class="btn btn-sm btn-primary mr-2" href="{{'/'+row[col]}}"
+                                                            download><i class="fa fa-download"></i>VIEW
                                                             /
                                                             DOWNLOAD</a>
                                                     </ng-container>
                                                     <ng-container
                                                         *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'tableBackblaze'">
                                                         <a class="btn btn-sm btn-primary mr-2"
-                                                            href="{{api_url + '/site/download/'+row[col]}}"
-                                                            [target]="'_blank'"><i class="fa fa-download"></i>VIEW /
+                                                            href="{{'/site/download/'+row[col]}}" [target]="'_blank'"><i
+                                                                class="fa fa-download"></i>VIEW /
                                                             DOWNLOAD</a>
                                                     </ng-container>
                                                     <ng-container
                                                         *ngIf="parseColumnOption(config.columnOption,'column',col,'setDownloadButton') === 'tableWasabi'">
                                                         <a class="btn btn-sm btn-primary mr-2"
-                                                            href="{{api_url + '/site/download-from-wasabi/'+row[col]}}"
+                                                            href="{{'/site/download-from-wasabi/'+row[col]}}"
                                                             [target]="'_blank'"><i class="fa fa-download"></i>VIEW /
                                                             DOWNLOAD</a>
                                                     </ng-container>
@@ -307,8 +301,7 @@
                                                 </ng-container>
                                             </ng-container>
                                         </ng-container>
-                                        <ng-container
-                                            *ngIf="(onEdit && row[config.primaryKey] == currentRow)">
+                                        <ng-container *ngIf="(onEdit && row[config.primaryKey] == currentRow)">
                                             <ng-container
                                                 [ngSwitch]="parseColumnOption(config.columnOption,'column',col,'inputType')">
                                                 <ng-container *ngSwitchCase="'date'">
@@ -517,14 +510,13 @@
             </table>
         </div>
         <!--begin: Pagination-->
-        <div class="kt-portlet__foot"
-            *ngIf="config.advanceOption.showPagination && config.dataSource.length > 0">
+        <div class="kt-portlet__foot" *ngIf="config.advanceOption.showPagination && config.dataSource.length > 0">
             <div class="kt-pagination kt-pagination--brand">
                 <ul class="kt-pagination__links">
                     <ngb-pagination [collectionSize]="config.paginateOption.total"
-                        [(page)]="config.paginateOption.pageNumber"
-                        [pageSize]="config.paginateOption.pageSize" [maxSize]="5" [rotate]="true"
-                        [ellipses]="false" [boundaryLinks]="true" (pageChange)="changePage($event, false)">
+                        [(page)]="config.paginateOption.pageNumber" [pageSize]="config.paginateOption.pageSize"
+                        [maxSize]="5" [rotate]="true" [ellipses]="false" [boundaryLinks]="true"
+                        (pageChange)="changePage($event, false)">
                     </ngb-pagination>
                     <span class="pagination__desc">
                         Page {{config.paginateOption.pageNumber}} of

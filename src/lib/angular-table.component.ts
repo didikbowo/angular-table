@@ -3,7 +3,6 @@ import { NgbModal, NgbDateAdapter, NgbDateNativeAdapter } from '@ng-bootstrap/ng
 import Swal from 'sweetalert2';
 import { DropzoneComponent } from 'ngx-dropzone-wrapper';
 import { AngularTableConfig } from './models/angular-table-config';
-import { GlobalService } from './global.service';
 import { faFilter, faSync, faMortarPestle, faEdit, faForward, faAngleDown, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -36,9 +35,6 @@ export class AngularTableComponent implements OnInit {
   // tslint:disable-next-line: no-inferrable-types
   checkboxAll: boolean = false;
 
-  api_url: string;
-  api_version_url: string;
-
   @ViewChild(DropzoneComponent, { read: true }) componentRef?: DropzoneComponent;
 
   @Output() currentPageSizeEvent = new EventEmitter<number>();
@@ -52,13 +48,10 @@ export class AngularTableComponent implements OnInit {
   @Output() rowAction = new EventEmitter<any>();
 
   constructor(
-    private modalService: NgbModal,
-    private globalService: GlobalService,
+    private modalService: NgbModal
   ) { }
 
   ngOnInit() {
-    this.api_url = this.globalService.apiHost;
-    this.api_version_url = this.globalService.apiVersionHost;
     this.currentPageSize = this.config.paginateOption.pageSize;
   }
 
