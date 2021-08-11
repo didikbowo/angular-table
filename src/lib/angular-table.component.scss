@@ -1,0 +1,8 @@
+.dropdown-toggle::after {
+    display:none;
+}
+
+.scrollable {
+    overflow-x: auto;
+    overflow-y: unset;
+}
